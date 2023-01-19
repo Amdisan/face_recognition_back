@@ -3,6 +3,11 @@ const bcrypt = require("bcrypt");
 const corse = require("cors");
 const knex = require("knex");
 
+const handleRegister = require("./controllers/register");
+const handleSignIn = require("./controllers/signIn");
+const handleImage = require("./controllers/image");
+const handleProfile = require("./controllers/profile");
+
 const pgDB = knex({
   client: "pg",
   connection: {
@@ -22,90 +27,13 @@ app.get("/", (req, res) => {
   res.send("success");
 });
 
-app.post("/signin", (req, res) => {
-  const { email, password } = req.body;
-  pgDB("login")
-    .select("email", "hash")
-    .where("email", "=", email)
-    .then((data) => {
-      if (bcrypt.compareSync(password, data[0].hash)) {
-        return pgDB("users")
-          .select("*")
-          .where("email", "=", email)
-          .then((user) => {
-            res.json(user[0]);
-          })
-          .catch((err) =>
-            res.status(400).json(`Unable to get user, ${err.detail}`)
-          );
-      } else {
-        res.status(400).json("Wrong credentials");
-      }
-    })
-    .catch((err) => res.status(400).json(`Wrong credentials, ${err.detail}`));
+app.post("/signin", (req, res) => handleSignIn(req, res, pgDB, bcrypt));
 
-  // res.json("success");
+app.post("/register", (req, res) => handleRegister(req, res, pgDB, bcrypt));
 
-  // res.status(400).json("error logging in");
-});
+app.get("/profile/:id", (req, res) => handleProfile(req, res, pgDB));
 
-app.post("/register", (req, res) => {
-  const { name, email, password } = req.body;
-  const saltRounds = 10;
-  const hash = bcrypt.hashSync(password, saltRounds);
-
-  pgDB
-    .transaction((trx) => {
-      return trx("login")
-        .insert({
-          email,
-          hash,
-        })
-        .returning("email")
-        .then((loginEmail) => {
-          return trx("users")
-            .insert({
-              email: loginEmail[0].email,
-              name,
-              joined: new Date(),
-            })
-            .returning("*")
-            .then((user) => {
-              res.json(user[0]);
-            });
-        });
-    })
-    .catch((err) => {
-      res.status(404).json(`Unable to register, ${err.detail}`);
-    });
-});
-
-app.get("/profile/:id", (req, res) => {
-  const { id } = req.params;
-  pgDB("users")
-    .select("*")
-    .where({ id })
-    .then((user) => {
-      if (user.length) {
-        res.json(user[0]);
-      } else {
-        res.status(404).json("no such user");
-      }
-    })
-    .catch((err) => res.status(400).json(`error getting user, ${err}`));
-});
-
-app.put("/image", (req, res) => {
-  const { id } = req.body;
-  pgDB("users")
-    .where("id", "=", id)
-    .increment("entries", 1)
-    .returning("entries")
-    .then((entries) => {
-      res.json(entries[0].entries);
-    })
-    .catch((err) => res.status(400).json(`unable to get rank, ${err}`));
-});
+app.put("/image", (req, res) => handleImage(req, res, pgDB));
 
 app.listen(3001, () => {
   console.log("server is runnning on port 3001");
