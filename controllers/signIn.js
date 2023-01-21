@@ -1,5 +1,10 @@
 const handleSignIn = (req, res, pgDB, bcrypt) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json("incorrect form submission");
+  }
+
   pgDB("login")
     .select("email", "hash")
     .where("email", "=", email)
@@ -21,4 +26,4 @@ const handleSignIn = (req, res, pgDB, bcrypt) => {
     .catch((err) => res.status(400).json(`Wrong credentials, ${err.detail}`));
 };
 
-module.exports = handleSignIn;
+export default handleSignIn;

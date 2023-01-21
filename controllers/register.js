@@ -1,5 +1,10 @@
 const handleRegister = (req, res, pgDB, bcrypt) => {
   const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json("incorrect form submission");
+  }
+
   const saltRounds = 10;
   const hash = bcrypt.hashSync(password, saltRounds);
 
@@ -29,4 +34,4 @@ const handleRegister = (req, res, pgDB, bcrypt) => {
     });
 };
 
-module.exports = handleRegister;
+export default handleRegister;

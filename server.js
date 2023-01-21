@@ -1,27 +1,24 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const corse = require("cors");
-const knex = require("knex");
+import express from "express";
+import bcrypt from "bcrypt";
+import cors from "cors";
+import knex from "knex";
 
-const handleRegister = require("./controllers/register");
-const handleSignIn = require("./controllers/signIn");
-const handleImage = require("./controllers/image");
-const handleProfile = require("./controllers/profile");
+import { connectConfig, port } from "./utils/init.js";
+
+import handleRegister from "./controllers/register.js";
+import handleSignIn from "./controllers/signIn.js";
+import handleImage from "./controllers/image.js";
+import handleProfile from "./controllers/profile.js";
 
 const pgDB = knex({
   client: "pg",
-  connection: {
-    host: "127.0.0.1", //localhost
-    user: "postgres",
-    password: "2811Zlata2015",
-    database: "face_recognition_db",
-  },
+  connection: connectConfig,
 });
 
 const app = express();
 
 app.use(express.json());
-app.use(corse());
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("success");
@@ -33,8 +30,8 @@ app.post("/register", (req, res) => handleRegister(req, res, pgDB, bcrypt));
 
 app.get("/profile/:id", (req, res) => handleProfile(req, res, pgDB));
 
-app.put("/image", (req, res) => handleImage(req, res, pgDB));
+app.post("/image", (req, res) => handleImage(req, res, pgDB));
 
-app.listen(3001, () => {
+app.listen(port, () => {
   console.log("server is runnning on port 3001");
 });

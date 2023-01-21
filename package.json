@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "backend app for the face recognition with clarify",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "nodemon"
   },
@@ -11,8 +12,10 @@
   "dependencies": {
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "knex": "^2.4.0",
+    "node-fetch": "^3.3.0",
     "pg": "^8.8.0"
   },
   "devDependencies": {

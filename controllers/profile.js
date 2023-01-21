@@ -13,4 +13,4 @@ const handleProfile = (req, res, pgDB) => {
     .catch((err) => res.status(400).json(`error getting user, ${err}`));
 };
 
-module.exports = handleProfile;
+export default handleProfile;
